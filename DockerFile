@@ -1,0 +1,38 @@
+# Usa una imagen oficial de Node.js como base, es muy importante que sea la imagen oficial
+# Esta imagen viene con Node.js y npm instalados
+FROM node:16
+
+# Establece el directorio de trabajo dentro del contenedor
+WORKDIR /usr/src/app
+
+# Esto asegura que solo las dependencias se instalen primero si no ha habido cambios en el código fuente
+COPY package*.json ./
+
+# Instala las dependencias del proyecto
+# Usa npm install para instalar todas las dependencias listadas en package.json
+RUN npm install
+
+# Copia el resto del código de la aplicación al contenedor
+COPY . .
+
+# Expone el puerto que la aplicación utilizará para recibir tráfico HTTP
+# Generalmente, las aplicaciones Node.js usan el puerto 3000 por defecto ()
+EXPOSE 3000
+
+# Instala MySQL Server dentro del contenedor
+# Usa una imagen oficial de MySQL 
+# Esta instrucción crea otro contenedor que funciona como un servicio de base de datos
+FROM mysql:8.0
+
+# Esto permite configurar la contraseña del usuario 'root' de MySQL dentro del contenedor
+ENV MYSQL_ROOT_PASSWORD=rootpassword
+
+# Esto es útil para el entorno de desarrollo, pero asegúrate de cambiarlo para producción
+ENV MYSQL_DATABASE=devdb
+
+# Mapea el puerto 3306 para las conexiones externas
+EXPOSE 3306
+
+# Comando que se ejecuta cuando se inicia el contenedor para arrancar el servidor Node.js
+# "node index.js" asume que el archivo de entrada de tu aplicación es 'index.js'
+CMD [ "node", "index.js" ]
